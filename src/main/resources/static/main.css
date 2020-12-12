@@ -1,0 +1,14 @@
+table  {
+    border-collapse: collapse;
+}
+ 
+table td, th  {
+    padding: 5px;
+}
+
+.success-message{
+	color: green;
+}
+body{
+	background-color: powderblue;
+}

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Online Cab Booking Application</title>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+<script th:src="@{/main.js}"></script>
+<link th:href="@{/main.css}" rel="stylesheet" />
+</head>
+<body>
+	<h1>Online Cab Booking Application</h1>
+
+	<div ng-app="mainApp" ng-controller="bookingController" id="mainController">
+		<form name="form" ng-submit="submitForm()">
+			<table>
+				<tr>
+					<td> Enter Your Name:</td>
+					<td><input type="text" ng-model="form.name" id="my-name" /></td>
+				</tr>
+				<tr></tr>
+				<tr></tr>
+				<tr></tr>
+				<tr>
+					<td><button type="button" id="location">Click to fetch Your Current Location</button> </td> 
+				</tr>
+				<tr>
+					<td>Latitude:</td>
+					<td><input type="lat" name="lat" ng-model="form.latitude" id="lat" /></td> 
+				</tr>
+				<tr>
+					<td>Longitude:</td>
+					<td><input type="long" name="long" ng-model="form.longitude" id="long" /></td>
+				</tr>
+				<tr><td><button type="submit">Book A Cab</button></td></tr>
+			</table>
+		</form>
+		<h1 class="success-message" *ngIf='form.driverName'>Driver :{{form.driverName}} Booked successfully!!!</h1>
+		
+		<form ng-submit="showAllDrivers()">
+	      <table>
+		      <tr>
+		         <td colspan="2">
+		             <input type="submit" value="Show All Nearest Drivers" class="blue-button" />
+		         </td>
+		      </tr>
+	      </table>
+      </form>
+      <table border="1">
+         <tr>
+            <th>Driver</th>
+            <th>Customer</th>
+            <th>Available</th>
+         </tr>
+         <!-- $scope.bookings -->
+         <tr ng-repeat="booking in bookings">
+            <td> {{ booking.name }}</td>
+            <td> {{ booking.customerName }}</td>
+            <td >{{ booking.available ? 'Available': 'Busy'}}</td>
+         </tr>
+      </table>
+	</div>
+	<script type="text/javascript">
+		var mainApp = angular.module("mainApp", []);
+		mainApp.controller('bookingController', function($scope, $timeout,
+				$http) {
+
+			$scope.showAllDrivers = function(){
+			$http.get('http://localhost:8080/drivers').
+			   then(function(response) {
+			   	console.log(response.data);
+			       $scope.bookings = response.data;
+			   });
+			}; 
+			
+			$scope.submitForm = function() {
+				console.log($scope.form.name);
+				console.log($scope.form.latitude);
+				console.log($scope.form.longitude);
+				$http({
+					url : 'http://localhost:8080/booking',
+					method : "POST",
+					data : {
+						"customerName" : $scope.form.name,
+						"customerLatitude" : $scope.form.latitude,
+						"customerLongitude" : $scope.form.longitude
+					}
+				}).then(function(response) {
+					$scope.form = response.data;
+				}, function(response) { // optional
+					// failed
+				});
+
+			}
+
+		});
+	</script>
+	<script type="text/javascript">
+		var lat, lng;
+		navigator.geolocation.getCurrentPosition(function(position) {
+			mylat = position.coords.latitude;
+			lng = position.coords.longitude;
+			console.log(mylat + ":" + lng);
+		});
+		$('#location').click(function() {
+			var lat = $("#lat");
+			lat.val(mylat);
+			lat.trigger('input');
+			var longitude = $("#long");
+			longitude.val(lng);
+			longitude.trigger('input');
+		});
+	</script>
+
+
+</body>
+</html>
